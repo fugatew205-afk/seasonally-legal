@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Seasonally — Data Retention and Disposal Policy</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 0 24px 64px; color: #111; line-height: 1.55; }
+  h1 { font-size: 1.6rem; color: #1f4b3a; }
+  h2 { font-size: 1.15rem; margin-top: 1.6rem; border-top: 1px solid #ddd; padding-top: 1rem; }
+  h3 { font-size: 1rem; }
+  table { border-collapse: collapse; width: 100%; font-size: 0.92rem; margin: 1rem 0; }
+  th, td { border: 1px solid #ccc; padding: 8px 10px; vertical-align: top; text-align: left; }
+  th { background: #f3f1eb; }
+  code, a { word-break: break-all; }
+  .meta { color: #444; font-size: 0.95rem; }
+  ul { padding-left: 1.2rem; }
+  @media print { body { margin: 0; } h2 { break-after: avoid; } }
+</style>
+</head>
+<body>
+<h1>Seasonally — Data Retention and Disposal Policy</h1>
+<p class="meta">**<strong>Entity:</strong>**<strong> Fugate Leasing and Consulting, LLC (operating as Seasonally)  </strong></p>
+<p class="meta">**<strong>Effective date:</strong>**<strong> August 7, 2026  </strong></p>
+<p class="meta">**<strong>Last reviewed:</strong>**<strong> August 7, 2026  </strong></p>
+<p class="meta">**<strong>Applies to:</strong>**<strong> The Seasonally mobile application and related backend systems  </strong></p>
+<p class="meta">**<strong>Related policy:</strong>**<strong> Privacy Policy (https://fugatew205-afk.github.io/seasonally-legal/privacy.html)</strong></p>
+<h2>1. Purpose</h2>
+<p><strong>This Data Retention and Disposal Policy describes how long Seasonally retains consumer data (including data obtained through Plaid), when and how that data is deleted, and how retention is reviewed. It is intended to support compliance with applicable U.S. privacy expectations and Plaid’s security / compliance questionnaire requirements.</strong></p>
+<h2>2. Scope</h2>
+<p><strong>This policy covers personal data and financial data processed by Seasonally, including:</strong></p>
+<ul>
+<li>Account registration data (name, email, authentication identifiers)</li>
+<li>Profile and preference data</li>
+<li>Bank account metadata, transactions, balances, and liabilities received via Plaid’s read-only APIs</li>
+<li>Encrypted Plaid access tokens and related link/item identifiers</li>
+<li>Debt-tracking records, savings goals, and app-generated insights</li>
+<li>Support, feedback, and security logs as described below</li>
+<li>Backups of production systems</li>
+</ul>
+<h2>3. Roles and ownership</h2>
+<p><strong>Information security and data-retention ownership is assigned to the Founder of Fugate Leasing and Consulting, LLC. Day-to-day enforcement is implemented in product controls (in-app account deletion, database cascade rules, and server-side deletion jobs).</strong></p>
+<h2>4. Retention principles</h2>
+<ol>
+<li>1. **Active accounts:** Retain data only as long as needed to provide the Seasonally service and as described in the Privacy Policy.</li>
+<li>2. **User control:** Users may delete their account in-app at any time.</li>
+<li>3. **Minimize sensitive credentials:** Bank login credentials are never stored by Seasonally (they are entered only in Plaid Link).</li>
+<li>4. **Least privilege and isolation:** Production data access is limited; user data is protected by database row-level security.</li>
+<li>5. **Legal holds:** Data may be retained longer when required for legal compliance, fraud prevention, security investigation, or dispute resolution.</li>
+</ol>
+<h2>5. Retention periods</h2>
+<table>
+<tr><th>Data category</th><th>Retention while account is active</th><th>Retention after account deletion / request</th></tr>
+<tr><td>Account profile, preferences, app settings</td><td>Duration of active account</td><td>Deleted from active production systems within **30 days**</td></tr>
+<tr><td>Plaid-derived account metadata, transactions, balances, liabilities</td><td>Duration of active account (or until user disconnects the institution)</td><td>Deleted from active production systems within **30 days** of account deletion; disconnecting a bank removes that institution’s linked data per product rules</td></tr>
+<tr><td>Encrypted Plaid access tokens</td><td>Duration of the linked item</td><td>Deleted when the item is removed or the account is deleted (within the same **30-day** active-system window)</td></tr>
+<tr><td>Debt accounts, savings goals, educational progress</td><td>Duration of active account</td><td>Deleted from active production systems within **30 days**</td></tr>
+<tr><td>Partner / household sharing links</td><td>While partnership is active</td><td>Cleared on unlink / account deletion</td></tr>
+<tr><td>AI provider request logs (Anthropic)</td><td>Per Anthropic’s API retention (up to **30 days** for abuse/security logging)</td><td>Controlled by Anthropic under their terms; Seasonally does not send raw merchant-level PII to the model</td></tr>
+<tr><td>Application error monitoring (Sentry)</td><td>Short operational window; PII scrubbed before send</td><td>Rotated/expired per vendor defaults; no intentional long-term store of financial PII</td></tr>
+<tr><td>System backups</td><td>Rolling backups of production</td><td>Retained **no more than 90 days**, then securely deleted in the ordinary course</td></tr>
+<tr><td>Records required for legal, fraud, tax, or dispute purposes</td><td>As required</td><td>Retained only as long as legally necessary, then deleted or archived with access restricted</td></tr>
+</table>
+<h2>6. Disposal / deletion methods</h2>
+<h3>6.1 User-initiated account deletion</h3>
+<ul>
+<li>Users can delete their account in the Seasonally app under Account settings.</li>
+<li>Deletion triggers server-side teardown that removes personal data from active production systems, including linked Plaid items/tokens where applicable, within **30 days**.</li>
+<li>In-app deletion is provided to meet platform expectations (including Apple App Store account-deletion requirements).</li>
+</ul>
+<h3>6.2 Institution disconnect</h3>
+<ul>
+<li>Users may disconnect bank connections in Account → Linked accounts.</li>
+<li>Disconnect removes the associated Plaid item and cascades deletion of that institution’s accounts/transactions from Seasonally’s active database according to product rules.</li>
+</ul>
+<h3>6.3 Backups</h3>
+<ul>
+<li>Backups may retain deleted data for up to **90 days**.</li>
+<li>Backup media/objects are deleted or overwritten in the ordinary backup rotation of the hosting provider (Supabase / underlying cloud infrastructure).</li>
+</ul>
+<h3>6.4 Secure handling</h3>
+<ul>
+<li>Plaid access tokens are encrypted at rest (application-layer AES-GCM) in addition to platform storage encryption.</li>
+<li>Production databases and storage rely on managed cloud encryption at rest and TLS in transit.</li>
+<li>Disposal is performed via logical deletion from production systems and expiration of backups; physical media destruction is handled by cloud infrastructure providers under their controls.</li>
+</ul>
+<h2>7. Plaid-specific notes</h2>
+<ul>
+<li>Seasonally uses Plaid for **read-only** access (Transactions and Liabilities). Seasonally does not initiate transfers or store bank login credentials.</li>
+<li>When a user deletes their Seasonally account or removes a linked item, Seasonally deletes stored Plaid-derived data and encrypted access tokens from active systems as described above.</li>
+<li>Users may also manage Plaid connections via Plaid’s end-user portal (my.plaid.com) subject to Plaid’s terms.</li>
+</ul>
+<h2>8. Legal requests and exceptions</h2>
+<p><strong>Seasonally may retain limited data longer when reasonably necessary to:</strong></p>
+<ul>
+<li>Comply with law, regulation, legal process, or governmental request</li>
+<li>Prevent fraud, abuse, or security incidents</li>
+<li>Establish, exercise, or defend legal claims</li>
+<li>Enforce the Terms of Service</li>
+</ul>
+<p><strong>Where feasible, retention under an exception is limited to the minimum necessary data and duration.</strong></p>
+<h2>9. Review cadence</h2>
+<p><strong>This policy is reviewed at least </strong>**<strong>annually</strong>**<strong>, and whenever material product, infrastructure, or legal changes affect retention or deletion practices. Updates are reflected in this document and, where material to users, in the public Privacy Policy.</strong></p>
+<h2>10. Contact</h2>
+<p><strong>Questions about retention or deletion:</strong></p>
+<p><strong>Seasonally  </strong></p>
+<p><strong>Fugate Leasing and Consulting, LLC  </strong></p>
+<p><strong>Registered agent: Einterz and Einterz Law  </strong></p>
+<p><strong>4600 Northwest Plaza W, Zionsville, IN 46077  </strong></p>
+<p><strong>Email: Fugatew205@gmail.com  </strong></p>
+<p><strong>Principal place of business: 5805 W 10th Street, Indianapolis, IN 46224</strong></p>
+<h2>11. Document control</h2>
+<table>
+<tr><th>Version</th><th>Date</th><th>Notes</th></tr>
+<tr><td>1.0</td><td>August 7, 2026</td><td>Initial standalone retention &amp; disposal policy aligned to Privacy Policy effective August 7, 2026</td></tr>
+</table>
+</body></html>
