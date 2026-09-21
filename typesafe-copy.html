@@ -3,31 +3,103 @@
 <meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>TypeSafe Copy All</title>
 <style>
-body{font-family:-apple-system,system-ui,sans-serif;margin:0;padding:16px}
+body{font-family:-apple-system,system-ui,sans-serif;margin:0;padding:16px;padding-bottom:80px}
+.bar{position:sticky;top:0;background:#fff;padding:12px 0;border-bottom:1px solid #ddd;z-index:5}
 button{width:100%;font-size:1.25rem;font-weight:700;padding:18px;border:0;border-radius:14px;background:#111;color:#fff}
-#status{margin:10px 0;font-weight:600;min-height:1.3em}
-pre{white-space:pre-wrap;word-break:break-word;font-size:12px;background:#f4f4f5;padding:12px;border-radius:12px;max-height:60vh;overflow:auto}
+#status{margin:10px 0;font-weight:600;min-height:1.3em;color:#0a7}
+pre{white-space:pre-wrap;word-break:break-word;font-size:12px;background:#f4f4f5;padding:12px;border-radius:12px}
+@media(prefers-color-scheme:dark){.bar{background:#000;border-color:#333}button{background:#eee;color:#111}pre{background:#1c1c1e;color:#eee}body{background:#111;color:#eee}}
 </style></head><body>
-<h1 style="font-size:1.15rem">TypeSafe → Claude</h1>
-<p>Tap Copy all, then paste into Claude.</p>
-<button id="b" type="button">Loading…</button>
+<div class="bar">
+<h1 style="font-size:1.15rem;margin:0 0 8px">TypeSafe → Claude</h1>
+<p style="margin:0 0 12px;opacity:.7">Tap Copy all, then paste into Claude.</p>
+<button id="b" type="button">Copy all</button>
 <div id="status"></div>
-<pre id="doc">Loading docs…</pre>
+</div>
+<pre id="doc"># TypeSafe reference pack for Claude
+Source: docs.typesafe.ai (fetched 2026-09-20). Prefer this over guessing.
+Full index: https://docs.typesafe.ai/llms.txt
+
+# Models
+Jev is TypeSafe's flagship System One model. Endpoint: POST /v1/systemone (same for all models). Select with request field `model`.
+
+## Current
+| Jev 1.13 | `jev-1.13.0` |
+| Price (per Btok / Mtok) | $42 / $0.042 |
+| Rate limits | 250k tokens/sec · 1,200 req/min |
+| Context | 64k/request; 32k for `state` + longest question |
+| Input | Text only (string, object, or text array). No image/audio/video. |
+
+- Price: charged on input tokens; output free.
+- Rate limits: over limit → 429. SDKs retry with backoff; honor retry-after.
+- Context: state ingested once; questions evaluated in parallel.
+- Preprocess non-text into text/structured fields before `state`.
+
+Rate limits may change dynamically under load. Higher limits: sales@typesafe.ai.
+
+## Aliases
+| Alias | Points to | Meaning |
+| jev-latest | jev-1.13.0 | Stable official (SDK default) |
+| jev-preview | jev-1.13.0 | Latest incl. preview (same as latest today) |
+
+Response `model` reports the versioned ID used. Pin versioned IDs if you tuned thresholds.
+
+## Customizing
+No fine-tunes/LoRAs. Shape answers via request: put proprietary material in `state`; encode rules in instructions/criteria; decompose into atomic questions and combine in code.
+
+## Language / data
+English best; other languages weaker — test. Not trained on customer traffic. See Legal for DPA / ZDR.
+
+## List models
+GET /v1/models — returns aliases your account can use. Versioned IDs still accepted.
+
+# API
+POST https://api.typesafe.ai/v1/systemone
+Authorization: Bearer <API_KEY>
+Content-Type: application/json
+
+## Request
+- state (required): string | object | array — content to evaluate
+- model (required): e.g. "jev-latest"
+- questions (required): map of id → Question
+
+Example:
+{"state":"Help! My payouts have been failing for 3 days.","model":"jev-latest","questions":{"is_urgent":{"type":"noul","instructions":"Does this convey urgency?"}}}
+
+## Question types
+All share type + instructions. instructions may be string|object|array (put question in one field, data in others; reference with backticks).
+
+### noul (yes/no → probability of yes)
+criteria optional: {true, false} descriptions.
+
+### choice (pick one option)
+criteria required: map of option → rubric (null ok). Max 255 options.
+Returns choice + probabilities + confidence.
+
+### score (ordered levels)
+criteria required: array of level descriptions (2–10).
+Returns score (can land between levels) + legend + probabilities + confidence.
+
+## Response
+{ model, answers: { <id>: Answer }, usage: { input_tokens, output_tokens } }
+
+### Answer types
+- noul: {type:"noul", noul: 0..1}
+- choice: {type:"choice", choice, probabilities, confidence}
+- score: {type:"score", score, legend, probabilities, confidence}
+
+## Errors
+401 bad key · 422 validation · 429 rate limit · 529 overloaded
+On 429/529: exponential backoff (SDKs do this by default).
+
+# Build tip
+Code owns workflow; Jev supplies typed judgments. Keep known rules/lookups/execution in code. Ask independent questions together (parallel). Use confidence/probabilities for routing — validate thresholds on your data.
+</pre>
 <script>
-const MD_URL = "https://cdn.jsdelivr.net/gh/fugatew205-afk/seasonally-legal@main/typesafe-pack.md";
-const b=document.getElementById('b'), s=document.getElementById('status'), d=document.getElementById('doc');
-(async()=>{
-  try{
-    const r=await fetch(MD_URL+"?t="+Date.now());
-    if(!r.ok) throw new Error("HTTP "+r.status);
-    const t=await r.text();
-    d.textContent=t;
-    b.textContent="Copy all";
-    b.onclick=async()=>{
-      try{await navigator.clipboard.writeText(t);s.textContent="Copied. Switch to Claude and paste.";b.textContent="Copied ✓";}
-      catch(e){const range=document.createRange();range.selectNodeContents(d);const sel=getSelection();sel.removeAllRanges();sel.addRange(range);s.textContent="Selected — use Copy from the selection menu.";}
-    };
-  }catch(e){b.textContent="Failed to load";s.textContent=String(e);}}
-)();
+const t=document.getElementById('doc').innerText,s=document.getElementById('status'),b=document.getElementById('b');
+b.onclick=async()=>{
+  try{await navigator.clipboard.writeText(t);s.textContent='Copied. Switch to Claude and paste.';b.textContent='Copied ✓';}
+  catch(e){const r=document.createRange();r.selectNodeContents(document.getElementById('doc'));const sel=getSelection();sel.removeAllRanges();sel.addRange(r);s.textContent='Selected — use Copy from the selection menu.';}
+};
 </script>
 </body></html>
