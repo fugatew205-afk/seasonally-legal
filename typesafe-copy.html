@@ -3,31 +3,18 @@
 <meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>TypeSafe Copy All</title>
 <style>
-body{font-family:-apple-system,system-ui,sans-serif;margin:0;padding:16px}
+body{font-family:-apple-system,system-ui,sans-serif;margin:0;padding:16px;padding-bottom:80px}
+.bar{position:sticky;top:0;background:#fff;padding:12px 0;border-bottom:1px solid #ddd;z-index:5}
 button{width:100%;font-size:1.25rem;font-weight:700;padding:18px;border:0;border-radius:14px;background:#111;color:#fff}
-#status{margin:10px 0;font-weight:600;min-height:1.3em}
-pre{white-space:pre-wrap;word-break:break-word;font-size:12px;background:#f4f4f5;padding:12px;border-radius:12px;max-height:60vh;overflow:auto}
+#status{margin:10px 0;font-weight:600;min-height:1.3em;color:#0a7}
+pre{white-space:pre-wrap;word-break:break-word;font-size:12px;background:#f4f4f5;padding:12px;border-radius:12px}
+@media(prefers-color-scheme:dark){.bar{background:#000;border-color:#333}button{background:#eee;color:#111}pre{background:#1c1c1e;color:#eee}body{background:#111;color:#eee}}
 </style></head><body>
-<h1 style="font-size:1.15rem">TypeSafe → Claude</h1>
-<p>Tap Copy all, then paste into Claude.</p>
-<button id="b" type="button">Loading…</button>
+<div class="bar">
+<h1 style="font-size:1.15rem;margin:0 0 8px">TypeSafe → Claude</h1>
+<p style="margin:0 0 12px;opacity:.7">Tap Copy all, then paste into Claude.</p>
+<button id="b" type="button">Copy all</button>
 <div id="status"></div>
-<pre id="doc">Loading docs…</pre>
-<script>
-const MD_URL = "https://cdn.jsdelivr.net/gh/fugatew205-afk/seasonally-legal@main/typesafe-pack.md";
-const b=document.getElementById('b'), s=document.getElementById('status'), d=document.getElementById('doc');
-(async()=>{
-  try{
-    const r=await fetch(MD_URL+"?t="+Date.now());
-    if(!r.ok) throw new Error("HTTP "+r.status);
-    const t=await r.text();
-    d.textContent=t;
-    b.textContent="Copy all";
-    b.onclick=async()=>{
-      try{await navigator.clipboard.writeText(t);s.textContent="Copied. Switch to Claude and paste.";b.textContent="Copied ✓";}
-      catch(e){const range=document.createRange();range.selectNodeContents(d);const sel=getSelection();sel.removeAllRanges();sel.addRange(range);s.textContent="Selected — use Copy from the selection menu.";}
-    };
-  }catch(e){b.textContent="Failed to load";s.textContent=String(e);}}
-)();
-</script>
+</div>
+<pre id="doc">PLACEHOLDER_SEE_NEXT</pre>
 </body></html>
